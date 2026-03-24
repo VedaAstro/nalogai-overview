@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NalogAI — Внутренний обзор проекта</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222;
+    --border: #333;
+    --text: #e5e5e5;
+    --text-dim: #999;
+    --accent: #3b82f6;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --green: #22c55e;
+    --cyan: #06b6d4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 80px 0 60px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 60px;
+  }
+  .hero-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border: 1px solid var(--accent);
+    border-radius: 20px;
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+  }
+  .hero h1 {
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    font-size: 20px;
+    color: var(--text-dim);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat .num {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+  }
+  .hero-stat .label {
+    font-size: 13px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Sections */
+  .section {
+    margin-bottom: 60px;
+  }
+  .section h2 {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .section h2 .num {
+    color: var(--accent);
+    font-weight: 400;
+    margin-right: 8px;
+  }
+  .section .subtitle {
+    color: var(--text-dim);
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+  .section h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 32px 0 12px;
+    color: var(--text);
+  }
+
+  p { margin-bottom: 12px; color: var(--text); font-size: 15px; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .card-header .icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .card-header h4 { font-size: 16px; font-weight: 600; }
+  .card-header .tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    margin-left: auto;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .card p { color: var(--text-dim); font-size: 14px; margin-bottom: 0; }
+
+  /* Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 32px; }
+  }
+
+  /* Table */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .data-table th {
+    text-align: left;
+    padding: 10px 16px;
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-weight: 500;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .data-table tr:hover td { background: var(--surface); }
+
+  /* Tags */
+  .tag-red { background: rgba(239,68,68,0.15); color: var(--red); }
+  .tag-yellow { background: rgba(245,158,11,0.15); color: var(--yellow); }
+  .tag-green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .tag-blue { background: rgba(59,130,246,0.15); color: var(--accent); }
+
+  /* Demo block */
+  .demo-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 24px 0;
+  }
+  .demo-header {
+    padding: 16px 24px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .demo-header .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .demo-header .title {
+    font-size: 13px; color: var(--text-dim); margin-left: 8px;
+  }
+  .demo-body {
+    padding: 24px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    color: var(--text);
+    overflow-x: auto;
+  }
+  .demo-body .red { color: var(--red); }
+  .demo-body .yellow { color: var(--yellow); }
+  .demo-body .green { color: var(--green); }
+  .demo-body .dim { color: var(--text-dim); }
+  .demo-body .accent { color: var(--accent); }
+  .demo-body .bold { font-weight: 700; }
+
+  /* Regions grid */
+  .regions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .region-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--surface);
+    border-radius: 8px;
+    font-size: 13px;
+    border: 1px solid var(--border);
+  }
+  .region-item .name { color: var(--text-dim); }
+  .region-item .val {
+    font-weight: 600;
+    font-family: 'SF Mono', monospace;
+  }
+
+  /* Flow */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin: 24px 0;
+    justify-content: center;
+  }
+  .flow-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    text-align: center;
+    min-width: 140px;
+  }
+  .flow-step .emoji { font-size: 24px; display: block; margin-bottom: 6px; }
+  .flow-step .name { font-size: 13px; font-weight: 600; }
+  .flow-step .desc { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+  .flow-arrow {
+    font-size: 20px;
+    color: var(--text-dim);
+    padding: 0 8px;
+  }
+
+  /* Phase timeline */
+  .timeline { position: relative; margin: 24px 0; padding-left: 32px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--border);
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 32px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -25px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    background: var(--bg);
+  }
+  .timeline-item.done::before {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .timeline-item.active::before {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.2);
+  }
+  .timeline-item h4 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .timeline-item .meta {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .timeline-item .meta .status {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 11px;
+  }
+  .timeline-item p { font-size: 14px; color: var(--text-dim); }
+
+  /* Pill list */
+  .pill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+  }
+  .pill {
+    padding: 6px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  /* Separator */
+  .sep {
+    height: 1px;
+    background: var(--border);
+    margin: 60px 0;
+  }
+
+  /* Link */
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Code inline */
+  code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--cyan);
+  }
+
+  /* Metric bar */
+  .metric-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .metric-bar .label { font-size: 13px; color: var(--text-dim); min-width: 120px; }
+  .metric-bar .bar {
+    flex: 1;
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .metric-bar .bar .fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s;
+  }
+  .metric-bar .val { font-size: 13px; font-weight: 600; min-width: 50px; text-align: right; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 40px 0;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- ========== HERO ========== -->
+<div class="hero">
+  <div class="hero-badge">Внутренний документ &middot; Март 2026</div>
+  <h1>Nalog<span>AI</span></h1>
+  <p>AI-аудитор декларации НДС. Находит ошибки до того, как их найдёт ФНС.</p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <span class="num">15</span>
+      <span class="label">Контрольных соотношений</span>
+    </div>
+    <div class="hero-stat">
+      <span class="num">7</span>
+      <span class="label">Детекторов аномалий</span>
+    </div>
+    <div class="hero-stat">
+      <span class="num">85</span>
+      <span class="label">Регионов РФ</span>
+    </div>
+    <div class="hero-stat">
+      <span class="num">9/9</span>
+      <span class="label">Тестов</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 1. Суть продукта ========== -->
+<div class="section">
+  <h2><span class="num">01</span> Суть продукта</h2>
+  <p class="subtitle">Зачем это нужно рынку</p>
+
+  <p>Бухгалтер выгружает XML-декларацию НДС из 1С, загружает в NalogAI, и через 2 секунды получает полный аудит: какие ошибки найдены, какие суммы под угрозой, и что конкретно исправить в 1С, чтобы избежать камеральной проверки.</p>
+
+  <p>Каждый квартал ~3,5 млн организаций сдают декларацию НДС. ФНС использует АСК НДС-2 — автоматическую систему, которая проверяет контрольные соотношения и отбирает декларации с высокой долей вычетов для углублённой камеральной проверки. NalogAI делает ту же проверку, но ДО подачи.</p>
+
+  <div class="flow">
+    <div class="flow-step">
+      <span class="emoji">📄</span>
+      <span class="name">XML из 1С</span>
+      <span class="desc">Выгрузка декларации</span>
+    </div>
+    <span class="flow-arrow">&rarr;</span>
+    <div class="flow-step">
+      <span class="emoji">🔍</span>
+      <span class="name">Парсинг</span>
+      <span class="desc">9 разделов</span>
+    </div>
+    <span class="flow-arrow">&rarr;</span>
+    <div class="flow-step">
+      <span class="emoji">⚙️</span>
+      <span class="name">Check Engine</span>
+      <span class="desc">Layer 1 + Layer 2</span>
+    </div>
+    <span class="flow-arrow">&rarr;</span>
+    <div class="flow-step">
+      <span class="emoji">📊</span>
+      <span class="name">Отчёт</span>
+      <span class="desc">Ошибки + fix в 1С</span>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ========== 2. Что под капотом ========== -->
+<div class="section">
+  <h2><span class="num">02</span> Что под капотом</h2>
+  <p class="subtitle">Три слоя проверок — от формальных КС до AI-аномалий</p>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-header">
+        <div class="icon" style="background:rgba(239,68,68,0.15)">⚖️</div>
+        <div>
+          <h4>Layer 1</h4>
+          <span class="tag tag-green">ГОТОВ</span>
+        </div>
+      </div>
+      <p>15 контрольных соотношений ФНС + валидация ИНН по контрольным цифрам. Те же проверки, что запускает АСК НДС-2.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="icon" style="background:rgba(245,158,11,0.15)">🔎</div>
+        <div>
+          <h4>Layer 2</h4>
+          <span class="tag tag-green">ГОТОВ</span>
+        </div>
+      </div>
+      <p>7 эвристических детекторов аномалий: дубли СФ, концентрация в конце квартала, круглые суммы, крупные единичные вычеты.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="icon" style="background:rgba(59,130,246,0.15)">🧠</div>
+        <div>
+          <h4>Layer 3</h4>
+          <span class="tag tag-blue">ФАЗА 2</span>
+        </div>
+      </div>
+      <p>RAG по НК РФ и письмам ФНС. Claude Sonnet + Voyage-3 embeddings + pgvector. Персонализированные рекомендации.</p>
+    </div>
+  </div>
+
+  <!-- Layer 1 detail -->
+  <h3>Layer 1 — Контрольные соотношения ФНС</h3>
+  <p>Источник: <strong>Приказ ФНС ЕД-7-15/519@</strong> и письмо ФНС от 05.02.2025 № СД-4-3/1064@.</p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Код</th><th>Проверка</th><th>Что сравнивается</th><th>Severity</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>KS_1_1</code></td><td>Итого начислено</td><td>стр.118 = сумма строк 010+020+030+070+080+105</td><td><span class="tag tag-red">RED</span></td></tr>
+      <tr><td><code>KS_1_2</code></td><td>Итого вычеты</td><td>стр.190 = 120+130+150+160+170</td><td><span class="tag tag-red">RED</span></td></tr>
+      <tr><td><code>KS_1_3</code></td><td>НДС к уплате</td><td>стр.200 = стр.118 &minus; стр.190</td><td><span class="tag tag-red">RED</span></td></tr>
+      <tr><td><code>KS_1_4</code></td><td>НДС к возмещению</td><td>стр.210 = стр.190 &minus; стр.118</td><td><span class="tag tag-red">RED</span></td></tr>
+      <tr><td><code>KS_1_5</code></td><td>Конфликт 200/210</td><td>стр.200 и стр.210 не могут быть обе > 0</td><td><span class="tag tag-red">RED</span></td></tr>
+      <tr><td><code>KS_1_6</code></td><td>Р.1 vs Р.3 (уплата)</td><td>Р.1 стр.040 = Р.3 стр.200</td><td><span class="tag tag-red">RED</span></td></tr>
+      <tr><td><code>KS_1_7</code></td><td>Р.1 vs Р.3 (возмещение)</td><td>Р.1 стр.050 = Р.3 стр.210</td><td><span class="tag tag-red">RED</span></td></tr>
+      <tr><td><code>KS_1_27</code></td><td>Книга покупок vs Р.3</td><td>Итого р.8 &asymp; стр.120 р.3</td><td><span class="tag tag-yellow">YELLOW</span></td></tr>
+      <tr><td><code>KS_1_28</code></td><td>Книга продаж vs Р.3</td><td>Итого р.9 &asymp; стр.118 р.3</td><td><span class="tag tag-yellow">YELLOW</span></td></tr>
+      <tr><td><code>HIGH_DEDUCTION_RATIO</code></td><td>Доля вычетов</td><td>стр.190 / стр.118 > порог региона</td><td><span class="tag tag-red">RED</span></td></tr>
+      <tr><td><code>INVALID_INN</code></td><td>Валидация ИНН</td><td>ИНН контрагентов по контрольным цифрам (10/12 знаков)</td><td><span class="tag tag-red">RED</span></td></tr>
+      <tr><td><code>ZERO_CHARGE_*</code></td><td>Нулевые начисления</td><td>стр.118 = 0, но стр.190 > 0</td><td><span class="tag tag-yellow">YELLOW</span></td></tr>
+      <tr><td><code>ADVANCE_NDS_*</code></td><td>Авансовый НДС</td><td>стр.070 > 0, но стр.170 = 0</td><td><span class="tag tag-yellow">YELLOW</span></td></tr>
+      <tr><td><code>RESTORED_*</code></td><td>Восстановленный НДС</td><td>стр.080 > 0 при нулевых начислениях</td><td><span class="tag tag-yellow">YELLOW</span></td></tr>
+    </tbody>
+  </table>
+
+  <p>Погрешность арифметических проверок: <strong>1 рубль (100 копеек)</strong> — допуск на округления в 1С. Для книг покупок/продаж — 100 рублей.</p>
+
+  <!-- Layer 2 detail -->
+  <h3>Layer 2 — Детекторы аномалий</h3>
+  <p>Эвристики, основанные на практике камеральных проверок.</p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Код</th><th>Аномалия</th><th>Порог</th><th>Severity</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>DUPLICATE_INVOICES</code></td><td>Дубли СФ в книге покупок (номер + дата + ИНН)</td><td>Любой дубль</td><td><span class="tag tag-red">RED</span></td></tr>
+      <tr><td><code>SALE_DUPLICATE_INVOICES</code></td><td>Дубли СФ в книге продаж</td><td>Любой дубль</td><td><span class="tag tag-red">RED</span></td></tr>
+      <tr><td><code>LAST_DAY_CONCENTRATION</code></td><td>Концентрация СФ в последний день квартала</td><td>> 30% от всех СФ</td><td><span class="tag tag-yellow">YELLOW</span></td></tr>
+      <tr><td><code>ROUND_AMOUNTS</code></td><td>Подозрительно много круглых сумм НДС</td><td>> 50% СФ кратны 1000 ₽</td><td><span class="tag tag-yellow">YELLOW</span></td></tr>
+      <tr><td><code>LARGE_SINGLE_INVOICE</code></td><td>Единичный вычет &mdash; непропорционально крупный</td><td>> 30% от всех вычетов</td><td><span class="tag tag-yellow">YELLOW</span></td></tr>
+      <tr><td><code>INVOICE_SEQUENCE_GAPS</code></td><td>Разрывы в нумерации исходящих СФ</td><td>Пропуск &ge; 1 номера</td><td><span class="tag tag-yellow">YELLOW</span></td></tr>
+      <tr><td><code>ZERO_NDS_PURCHASES</code></td><td>СФ с нулевым НДС при ненулевой сумме</td><td>> 3 шт., без ставки 0%</td><td><span class="tag tag-yellow">YELLOW</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="sep"></div>
+
+<!-- ========== 3. База знаний — регионы ========== -->
+<div class="section">
+  <h2><span class="num">03</span> Безопасные доли вычетов по регионам</h2>
+  <p class="subtitle">85 регионов РФ. Источник: Отчёт ФНС 1-НДС за Q3 2025. Обновляется ежеквартально.</p>
+
+  <p>ФНС публикует статистику средних долей вычетов по каждому региону. Если доля вычетов организации выше — декларация попадает в зону риска для камеральной проверки. NalogAI знает пороги для всех 85 регионов и определяет регион по первым 2 цифрам ИНН (надёжнее ОКТМО).</p>
+
+  <h3>Примеры порогов (полный список — в системе)</h3>
+  <div class="regions-grid">
+    <div class="region-item"><span class="name">Москва (77)</span><span class="val" style="color:var(--red)">89.0%</span></div>
+    <div class="region-item"><span class="name">Санкт-Петербург (78)</span><span class="val" style="color:var(--yellow)">87.5%</span></div>
+    <div class="region-item"><span class="name">Московская обл. (50)</span><span class="val" style="color:var(--yellow)">89.6%</span></div>
+    <div class="region-item"><span class="name">Краснодар (23)</span><span class="val" style="color:var(--yellow)">91.4%</span></div>
+    <div class="region-item"><span class="name">Татарстан (16)</span><span class="val" style="color:var(--yellow)">91.7%</span></div>
+    <div class="region-item"><span class="name">Новосибирск (54)</span><span class="val" style="color:var(--yellow)">94.2%</span></div>
+    <div class="region-item"><span class="name">Свердловская (66)</span><span class="val" style="color:var(--yellow)">91.0%</span></div>
+    <div class="region-item"><span class="name">Башкортостан (02)</span><span class="val" style="color:var(--yellow)">91.5%</span></div>
+    <div class="region-item"><span class="name">Ростовская (61)</span><span class="val" style="color:var(--red)">94.0%</span></div>
+    <div class="region-item"><span class="name">Челябинская (74)</span><span class="val" style="color:var(--yellow)">89.3%</span></div>
+    <div class="region-item"><span class="name">Нижегородская (52)</span><span class="val" style="color:var(--yellow)">90.5%</span></div>
+    <div class="region-item"><span class="name">Курская (46)</span><span class="val" style="color:var(--red)">96.0%</span></div>
+    <div class="region-item"><span class="name">ХМАО-Югра (86)</span><span class="val" style="color:var(--green)">78.2%</span></div>
+    <div class="region-item"><span class="name">ЯНАО (89)</span><span class="val" style="color:var(--green)">78.1%</span></div>
+    <div class="region-item"><span class="name">Чечня (20)</span><span class="val" style="color:var(--red)">95.1%</span></div>
+    <div class="region-item"><span class="name">Среднее по РФ</span><span class="val" style="color:var(--accent)">89.3%</span></div>
+  </div>
+  <p style="font-size:13px; color:var(--text-dim)">Разброс от 78.1% (ЯНАО — нефтедобыча, низкие вычеты) до 96.8% (Северная Осетия). Среднероссийский порог 89.3% применяется для неизвестных регионов.</p>
+</div>
+
+<div class="sep"></div>
+
+<!-- ========== 4. Пример реального аудита ========== -->
+<div class="section">
+  <h2><span class="num">04</span> Пример: реальный аудит</h2>
+  <p class="subtitle">Тестовая декларация ООО "Тест НДС" (ИНН 7701234567) за Q1 2026</p>
+
+  <div class="grid-2" style="margin-bottom:24px">
+    <div class="card" style="border-left: 3px solid var(--accent);">
+      <p style="font-size:12px; color:var(--text-dim); margin-bottom:8px;">ВХОДНЫЕ ДАННЫЕ</p>
+      <p style="color:var(--text); margin-bottom:6px;"><strong>НДС начислено:</strong> 9 000 000 ₽</p>
+      <p style="color:var(--text); margin-bottom:6px;"><strong>НДС к вычету:</strong> 8 500 000 ₽</p>
+      <p style="color:var(--text); margin-bottom:6px;"><strong>К уплате:</strong> 500 000 ₽</p>
+      <p style="color:var(--text); margin-bottom:6px;"><strong>Доля вычетов:</strong> 94.4%</p>
+      <p style="color:var(--text); margin-bottom:0;"><strong>Регион:</strong> Москва (порог 89.0%)</p>
+    </div>
+    <div class="card" style="border-left: 3px solid var(--red);">
+      <p style="font-size:12px; color:var(--text-dim); margin-bottom:8px;">РЕЗУЛЬТАТ АУДИТА</p>
+      <p style="color:var(--red); font-size:24px; font-weight:700; margin-bottom:6px;">3 <span style="font-size:14px; font-weight:400;">критических</span></p>
+      <p style="color:var(--yellow); font-size:24px; font-weight:700; margin-bottom:6px;">1 <span style="font-size:14px; font-weight:400;">предупреждение</span></p>
+      <p style="color:var(--green); font-size:24px; font-weight:700; margin-bottom:6px;">8 <span style="font-size:14px; font-weight:400;">пройдено</span></p>
+      <p style="color:var(--text); margin-bottom:0;"><strong>Сумма под угрозой:</strong> 610 000 ₽</p>
+    </div>
+  </div>
+
+  <div class="demo-block">
+    <div class="demo-header">
+      <span class="dot" style="background:var(--red)"></span>
+      <span class="dot" style="background:var(--yellow)"></span>
+      <span class="dot" style="background:var(--green)"></span>
+      <span class="title">NalogAI Check Engine — CLI Output</span>
+    </div>
+    <div class="demo-body"><span class="dim">============================================================</span>
+<span class="bold">АУДИТ НДС: ООО "Тест НДС" (7701234567)</span>
+Период: Q1 2026
+Начислено НДС: 9,000,000 ₽
+Вычеты НДС:    8,500,000 ₽
+К уплате:      500,000 ₽
+Доля вычетов:  94.4%
+
+<span class="red">&#x1F534; Критических:  3</span>
+<span class="yellow">&#x1F7E1; Предупреждений: 1</span>
+<span class="green">&#x1F7E2; Пройдено:     8</span>
+💰 Под угрозой:  610,000 ₽
+<span class="dim">============================================================</span>
+
+<span class="red">&#x1F534; [HIGH_DEDUCTION_RATIO]</span> <span class="bold">Доля вычетов 94.4% превышает безопасный порог 89.0% (Москва)</span>
+   ФНС автоматически отбирает декларации с долей вычетов выше
+   регионального порога для углублённой камеральной проверки.
+   💰 Под угрозой: 490,000 ₽
+   <span class="green">✅ Перенесите часть вычетов на следующий квартал.</span>
+      п. 1.1 ст. 172 НК РФ — вычеты можно заявить в течение 3 лет
+   <span class="accent">📋 Основание: ст. 172 п. 1.1 НК РФ, Письмо ФНС СД-4-3/9134@</span>
+
+<span class="red">&#x1F534; [INVALID_INN]</span> <span class="bold">Невалидные ИНН контрагентов: 6 шт.</span>
+   ИНН не прошли проверку контрольных цифр:
+   7702123456, 7703234567, 7701111111, 7705456789, 7706567890
+   <span class="green">✅ Проверьте ИНН на nalog.ru. Вычеты по СФ с невалидным ИНН
+      могут быть оспорены ФНС.</span>
+   <span class="accent">📋 Основание: ст. 169 НК РФ п. 5, ст. 172 НК РФ</span>
+
+<span class="red">&#x1F534; [DUPLICATE_INVOICES]</span> <span class="bold">Дубликаты СФ в книге покупок: 1 шт.</span>
+   СФ №089 от 15.02.2026, ИНН 7704345678 — 2 записи
+   💰 Под угрозой: 120,000 ₽
+   <span class="green">✅ Проверьте книгу покупок в 1С на задвоение СФ.</span>
+
+<span class="yellow">&#x1F7E1; [LARGE_SINGLE_INVOICE]</span> <span class="bold">Единичный вычет = 42% от всех вычетов</span>
+   СФ №234 от 28.03.2026 (ИНН 7703234567) содержит НДС 2,700,000 ₽
+   <span class="green">✅ Подготовьте документальное подтверждение: договор, акт, ТТН.</span>
+
+<span class="green">&#x1F7E2; КС 1.1: Строка 118 корректна</span>
+<span class="green">&#x1F7E2; КС 1.2: Строка 190 корректна</span>
+<span class="green">&#x1F7E2; КС 1.3: Строка 200 корректна</span>
+<span class="green">&#x1F7E2; КС 1.4–1.5: Разделы не конфликтуют</span>
+<span class="green">&#x1F7E2; КС 1.6–1.7: Разделы 1 и 3 согласованы</span>
+<span class="green">&#x1F7E2; КС 1.27: Книга покупок согласована с разделом 3</span></div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ========== 5. Архитектура ========== -->
+<div class="section">
+  <h2><span class="num">05</span> Архитектура и стек</h2>
+  <p class="subtitle">Минимальный стек для MVP, масштабируемый до production</p>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="icon" style="background:rgba(59,130,246,0.15)">⚡</div>
+        <h4>Backend</h4>
+      </div>
+      <p><strong>FastAPI + SQLAlchemy + SQLite</strong><br>
+      Синхронная обработка файлов (XML < 5 МБ), REST API с 4 эндпоинтами. В production — PostgreSQL + pgvector.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="icon" style="background:rgba(34,197,94,0.15)">🖥</div>
+        <h4>Frontend</h4>
+      </div>
+      <p><strong>Next.js 15 + App Router + Tailwind</strong><br>
+      Drag-and-drop загрузка XML/ZIP. Дашборд результатов с карточками проблем. shadcn/ui компоненты.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="icon" style="background:rgba(245,158,11,0.15)">🔍</div>
+        <h4>XML-парсер</h4>
+      </div>
+      <p><strong>Content-based type detection</strong><br>
+      Не привязан к именам файлов или конкретной XSD-версии. Работает со всеми версиями XML декларации НДС с 2019 года. Поддержка windows-1251 и UTF-8.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="icon" style="background:rgba(6,182,212,0.15)">🧠</div>
+        <h4>AI (Фаза 2)</h4>
+      </div>
+      <p><strong>Claude Sonnet 4.6 + Voyage-3 + pgvector</strong><br>
+      RAG по Налоговому кодексу и письмам ФНС. Персонализированные рекомендации с ссылками на конкретные статьи.</p>
+    </div>
+  </div>
+
+  <h3>Структура проекта</h3>
+  <div class="demo-block">
+    <div class="demo-header">
+      <span class="dot" style="background:#555"></span>
+      <span class="dot" style="background:#555"></span>
+      <span class="dot" style="background:#555"></span>
+      <span class="title">nalogai/</span>
+    </div>
+    <div class="demo-body"><span class="accent">backend/</span>
+├── <span class="accent">parser/</span>
+│   ├── models.py          <span class="dim"># NDSDeclaration, Section1/3/8/9, Invoice</span>
+│   └── xml_parser.py      <span class="dim"># NDSXMLParser: parse_file/bytes/zip</span>
+├── <span class="accent">checks/</span>
+│   ├── models.py          <span class="dim"># Issue, CheckResult, Severity, Category</span>
+│   ├── regions.py         <span class="dim"># 85 регионов, безопасные доли вычетов</span>
+│   ├── rules.py           <span class="dim"># Layer 1: 15 КС + валидация ИНН</span>
+│   ├── anomalies.py       <span class="dim"># Layer 2: 7 эвристик</span>
+│   └── engine.py          <span class="dim"># run_check() + format_report()</span>
+├── <span class="accent">api/</span>
+│   ├── main.py            <span class="dim"># FastAPI app, CORS, /api/v1</span>
+│   ├── database.py        <span class="dim"># SQLAlchemy + SQLite</span>
+│   ├── models_db.py       <span class="dim"># CheckDB, IssueDB — ORM</span>
+│   ├── schemas.py         <span class="dim"># Pydantic: CheckOut, IssueOut</span>
+│   └── routes/checks.py   <span class="dim"># POST/GET/DELETE /checks</span>
+<span class="accent">frontend/</span>
+├── app/page.tsx            <span class="dim"># Upload page — drag-and-drop</span>
+├── app/check/[id]/page.tsx <span class="dim"># Dashboard результатов</span>
+├── components/
+│   ├── UploadZone.tsx      <span class="dim"># Drag-and-drop зона</span>
+│   ├── CheckSummary.tsx    <span class="dim"># Шапка: 🔴🟡🟢 + суммы</span>
+│   ├── IssueCard.tsx       <span class="dim"># Раскрывающаяся карточка</span>
+│   └── IssueList.tsx       <span class="dim"># Список проблем</span>
+└── lib/api.ts              <span class="dim"># fetch-клиент к FastAPI</span></div>
+  </div>
+
+  <h3>API Endpoints</h3>
+  <table class="data-table">
+    <thead>
+      <tr><th>Method</th><th>URL</th><th>Описание</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>POST</code></td><td><code>/api/v1/checks</code></td><td>Загрузить XML/ZIP, запустить аудит, вернуть результат</td></tr>
+      <tr><td><code>GET</code></td><td><code>/api/v1/checks</code></td><td>Список проверок (последние 20)</td></tr>
+      <tr><td><code>GET</code></td><td><code>/api/v1/checks/{id}</code></td><td>Результат проверки + все issues</td></tr>
+      <tr><td><code>DELETE</code></td><td><code>/api/v1/checks/{id}</code></td><td>Удалить проверку</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="sep"></div>
+
+<!-- ========== 6. Модели данных ========== -->
+<div class="section">
+  <h2><span class="num">06</span> Модели данных</h2>
+  <p class="subtitle">Что система извлекает из XML и как хранит результаты</p>
+
+  <h3>NDSDeclaration — полная структура декларации</h3>
+  <table class="data-table">
+    <thead><tr><th>Поле</th><th>Тип</th><th>Описание</th></tr></thead>
+    <tbody>
+      <tr><td><code>inn</code></td><td>str</td><td>ИНН организации (10 знаков ЮЛ / 12 знаков ФЛ)</td></tr>
+      <tr><td><code>kpp</code></td><td>str</td><td>КПП</td></tr>
+      <tr><td><code>company_name</code></td><td>str</td><td>Наименование организации</td></tr>
+      <tr><td><code>period</code></td><td>str</td><td>"21"=Q1, "22"=Q2, "23"=Q3, "24"=Q4</td></tr>
+      <tr><td><code>year</code></td><td>str</td><td>Налоговый год</td></tr>
+      <tr><td><code>region_code</code></td><td>str</td><td>Первые 2 цифры ИНН → код региона</td></tr>
+      <tr><td><code>section1</code></td><td>Section1</td><td>КБК, ОКТМО, стр.040 (к уплате), стр.050 (к возмещению)</td></tr>
+      <tr><td><code>section3</code></td><td>Section3</td><td>24 строки: база + налог по ставкам, вычеты, итоги</td></tr>
+      <tr><td><code>section8</code></td><td>Section8</td><td>Книга покупок: список Invoice + итого НДС</td></tr>
+      <tr><td><code>section9</code></td><td>Section9</td><td>Книга продаж: список Invoice + итого база + НДС</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Section3 — Раздел 3 (ядро расчёта)</h3>
+  <p>Все суммы хранятся в <strong>копейках</strong> (int). Это исключает ошибки округления float при арифметических проверках.</p>
+  <table class="data-table">
+    <thead><tr><th>Поле</th><th>Строка декларации</th><th>Что содержит</th></tr></thead>
+    <tbody>
+      <tr><td><code>line010_base / _tax</code></td><td>010</td><td>Реализация по ставке 20%</td></tr>
+      <tr><td><code>line020_base / _tax</code></td><td>020</td><td>Реализация по ставке 18% (исторические)</td></tr>
+      <tr><td><code>line030_base / _tax</code></td><td>030</td><td>Реализация по ставке 10%</td></tr>
+      <tr><td><code>line070_tax</code></td><td>070</td><td>НДС с авансов полученных</td></tr>
+      <tr><td><code>line080_tax</code></td><td>080</td><td>НДС восстановленный</td></tr>
+      <tr><td><code>line118</code></td><td>118</td><td><strong>ИТОГО начислено</strong></td></tr>
+      <tr><td><code>line120</code></td><td>120</td><td>Вычеты по товарам/работам/услугам</td></tr>
+      <tr><td><code>line130</code></td><td>130</td><td>Вычеты с авансов выданных</td></tr>
+      <tr><td><code>line190</code></td><td>190</td><td><strong>ИТОГО вычеты</strong></td></tr>
+      <tr><td><code>line200</code></td><td>200</td><td>НДС к уплате (118 &minus; 190)</td></tr>
+      <tr><td><code>line210</code></td><td>210</td><td>НДС к возмещению (190 &minus; 118)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Invoice — счёт-фактура</h3>
+  <table class="data-table">
+    <thead><tr><th>Поле</th><th>Тип</th><th>Описание</th></tr></thead>
+    <tbody>
+      <tr><td><code>inn_seller</code></td><td>str</td><td>ИНН продавца (книга покупок) / покупателя (книга продаж)</td></tr>
+      <tr><td><code>invoice_number</code></td><td>str</td><td>Номер СФ</td></tr>
+      <tr><td><code>invoice_date</code></td><td>date</td><td>Дата СФ</td></tr>
+      <tr><td><code>amount_total</code></td><td>int</td><td>Сумма с НДС (копейки)</td></tr>
+      <tr><td><code>amount_nds</code></td><td>int</td><td>Сумма НДС (копейки)</td></tr>
+      <tr><td><code>tax_rate</code></td><td>str</td><td>"20", "10", "20/120", "0", "без НДС"</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Issue — найденная проблема</h3>
+  <table class="data-table">
+    <thead><tr><th>Поле</th><th>Тип</th><th>Описание</th></tr></thead>
+    <tbody>
+      <tr><td><code>severity</code></td><td>enum</td><td><span class="tag tag-red">RED</span> <span class="tag tag-yellow">YELLOW</span> <span class="tag tag-green">GREEN</span></td></tr>
+      <tr><td><code>category</code></td><td>enum</td><td>control_ratio / anomaly / counterparty / recommendation</td></tr>
+      <tr><td><code>code</code></td><td>str</td><td>Уникальный код: <code>HIGH_DEDUCTION_RATIO</code>, <code>KS_1_1</code>, ...</td></tr>
+      <tr><td><code>title</code></td><td>str</td><td>Заголовок для пользователя</td></tr>
+      <tr><td><code>description</code></td><td>str</td><td>Подробное описание с цифрами</td></tr>
+      <tr><td><code>amount_at_risk</code></td><td>int</td><td>Сумма под угрозой (копейки)</td></tr>
+      <tr><td><code>recommendation</code></td><td>str</td><td>Что делать</td></tr>
+      <tr><td><code>legal_basis</code></td><td>list[str]</td><td>Ссылки на НК РФ и письма ФНС</td></tr>
+      <tr><td><code>how_to_fix</code></td><td>str</td><td>Инструкция для 1С</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="sep"></div>
+
+<!-- ========== 7. Roadmap ========== -->
+<div class="section">
+  <h2><span class="num">07</span> Статус и Roadmap</h2>
+  <p class="subtitle">Что сделано, что в работе, что дальше</p>
+
+  <div class="timeline">
+    <div class="timeline-item done">
+      <h4>Фаза 0 — Ядро</h4>
+      <div class="meta">
+        <span class="status tag-green">ЗАВЕРШЕНА</span>
+        <span>Март 2026</span>
+      </div>
+      <p>XML-парсер, Check Engine (Layer 1 + 2), 85 регионов, 9/9 тестов.</p>
+    </div>
+
+    <div class="timeline-item done">
+      <h4>Фаза 1 — MVP Web</h4>
+      <div class="meta">
+        <span class="status tag-green">ЗАВЕРШЕНА</span>
+        <span>Март 2026</span>
+      </div>
+      <p>FastAPI + SQLite + Next.js 15. Drag-and-drop XML, дашборд результатов, карточки проблем с рекомендациями. Полный flow работает.</p>
+    </div>
+
+    <div class="timeline-item active">
+      <h4>Валидация с клиентами</h4>
+      <div class="meta">
+        <span class="status tag-blue">СЛЕДУЮЩИЙ ШАГ</span>
+        <span>Апрель 2026</span>
+      </div>
+      <p>5 бухгалтеров с реальными XML-декларациями. Цель: проверить парсер на боевых данных, собрать обратную связь по UX и ценности отчёта.</p>
+    </div>
+
+    <div class="timeline-item">
+      <h4>Фаза 2 — Монетизация</h4>
+      <div class="meta">
+        <span>Q2 2026</span>
+      </div>
+      <p>Auth (magic link), биллинг (ЮKassa), PDF-отчёты, проверка контрагентов (API ФНС), RAG Layer 3 (Claude + НК РФ), деплой на Selectel VPS.</p>
+    </div>
+
+    <div class="timeline-item">
+      <h4>Фаза 3 — Масштабирование</h4>
+      <div class="meta">
+        <span>Q3–Q4 2026</span>
+      </div>
+      <p>Интеграция с 1С-Фреш, Контур.Экстерн, СБИС. White-label для аутсорс-бухгалтерий. ML-модели на данных клиентов.</p>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ========== 8. Монетизация ========== -->
+<div class="section">
+  <h2><span class="num">08</span> Монетизация</h2>
+  <p class="subtitle">Freemium + SaaS. Вход бесплатный, платишь за объём.</p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Тариф</th><th>Цена/мес</th><th>Проверок</th><th>Аудитория</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Free</strong></td><td>0 ₽</td><td>1 / квартал</td><td>Попробовать</td></tr>
+      <tr><td><strong>Старт</strong></td><td>1 990 ₽</td><td>3 / квартал</td><td>Микробизнес, ИП</td></tr>
+      <tr><td><strong>Бизнес</strong></td><td>4 990 ₽</td><td>10 / квартал</td><td>Малый бизнес</td></tr>
+      <tr><td><strong>Про</strong></td><td>14 990 ₽</td><td>50 / квартал</td><td>Бухгалтерские фирмы</td></tr>
+      <tr><td><strong>Enterprise</strong></td><td>29 990 ₽</td><td>Без лимита</td><td>Аутсорс, аудиторские</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Unit-экономика</strong>: себестоимость 1 проверки &asymp; 2 ₽ (compute) + 8 ₽ (Claude API для Layer 3) = 10 ₽. При тарифе "Бизнес" — маржа > 95%.</p>
+</div>
+
+<div class="sep"></div>
+
+<!-- ========== 9. Решения и обоснования ========== -->
+<div class="section">
+  <h2><span class="num">09</span> Ключевые архитектурные решения</h2>
+  <p class="subtitle">Почему так, а не иначе</p>
+
+  <div class="card" style="margin-bottom:16px">
+    <h4 style="margin-bottom:8px">Копейки (int) вместо рублей (float)</h4>
+    <p>Все суммы хранятся в копейках как целые числа. Это исключает ошибки IEEE 754 при арифметических проверках. Пример: <code>0.1 + 0.2 ≠ 0.3</code> в float, но <code>10 + 20 = 30</code> в int. Для декларации НДС это критично — расхождение в 1 копейку может дать ложный RED.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <h4 style="margin-bottom:8px">Content-based detection вместо привязки к XSD</h4>
+    <p>ФНС меняет XSD-схемы каждый год (v5.09, v5.10, v5.11...). Парсер ищет разделы по набору тегов в XML, а не по структуре конкретной версии. Это позволяет работать со всеми версиями деклараций с 2019 года без обновления кода при смене формата.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <h4 style="margin-bottom:8px">Регион по ИНН, а не по ОКТМО</h4>
+    <p>ОКТМО для Москвы начинается с "45", но безопасные доли вычетов ФНС публикует по коду региона "77". Использование первых 2 цифр ИНН надёжнее — они всегда совпадают с кодом региона регистрации организации.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <h4 style="margin-bottom:8px">SQLite для MVP, PostgreSQL + pgvector для production</h4>
+    <p>SQLite не требует отдельного процесса и деплоя. Для MVP с одним пользователем — идеально. При переходе к production: PostgreSQL + pgvector (для RAG embeddings) на Selectel VPS.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <h4 style="margin-bottom:8px">Selectel VPS, а не Vercel / AWS</h4>
+    <p>152-ФЗ: персональные данные (ИНН, КПП, наименования организаций) должны храниться на территории РФ. Vercel и AWS не имеют ЦОД в России. Selectel: рублёвые платежи, SLA 99.9%, 152-ФЗ compliance из коробки.</p>
+  </div>
+
+  <div class="card">
+    <h4 style="margin-bottom:8px">Синхронная обработка без Celery</h4>
+    <p>XML-декларация НДС — это файл 0.5–5 МБ. Парсинг + проверка занимает < 500 мс. Celery, Redis, worker — оверинжиниринг для такого объёма. Если файл > 10 МБ — API возвращает 413.</p>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ========== 10. Демо ========== -->
+<div class="section">
+  <h2><span class="num">10</span> Рабочая демо-версия</h2>
+  <p class="subtitle">Запущена локально, готова к показу</p>
+
+  <div class="grid-2">
+    <div class="card" style="text-align:center;">
+      <p style="font-size:13px; color:var(--text-dim); margin-bottom:12px;">FRONTEND</p>
+      <p style="font-size:24px; font-weight:700; margin-bottom:8px;">localhost:3000</p>
+      <p>Next.js 15 &middot; Drag-and-drop XML &middot; Дашборд</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <p style="font-size:13px; color:var(--text-dim); margin-bottom:12px;">BACKEND API</p>
+      <p style="font-size:24px; font-weight:700; margin-bottom:8px;">localhost:8000</p>
+      <p>FastAPI &middot; Swagger UI &middot; <a href="http://localhost:8000/docs">/docs</a></p>
+    </div>
+  </div>
+
+  <p style="margin-top:16px;">Для демонстрации: загрузить <code>data/samples/sample_main.xml</code> через интерфейс. Результат: 3 критических + 1 предупреждение + 8 пройденных проверок. Сумма под угрозой: 610 000 ₽.</p>
+</div>
+
+<div class="footer">
+  NalogAI &middot; Внутренний обзор проекта &middot; Март 2026<br>
+  Конфиденциально. Не для распространения.
+</div>
+
+</div>
+</body>
+</html>
