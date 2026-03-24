@@ -258,7 +258,12 @@
     text-align: center;
     min-width: 140px;
   }
-  .flow-step .emoji { font-size: 24px; display: block; margin-bottom: 6px; }
+  .flow-step .step-num {
+    font-size: 14px; font-weight: 700; color: var(--accent);
+    width: 28px; height: 28px; border: 2px solid var(--accent);
+    border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; margin: 0 auto 8px;
+  }
   .flow-step .name { font-size: 13px; font-weight: 600; }
   .flow-step .desc { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
   .flow-arrow {
@@ -428,25 +433,25 @@
 
   <div class="flow">
     <div class="flow-step">
-      <span class="emoji">📄</span>
+      <span class="step-num">1</span>
       <span class="name">XML из 1С</span>
       <span class="desc">Выгрузка декларации</span>
     </div>
     <span class="flow-arrow">&rarr;</span>
     <div class="flow-step">
-      <span class="emoji">🔍</span>
+      <span class="step-num">2</span>
       <span class="name">Парсинг</span>
-      <span class="desc">9 разделов</span>
+      <span class="desc">9 разделов, 24+ поля</span>
     </div>
     <span class="flow-arrow">&rarr;</span>
     <div class="flow-step">
-      <span class="emoji">⚙️</span>
+      <span class="step-num">3</span>
       <span class="name">Check Engine</span>
-      <span class="desc">Layer 1 + Layer 2</span>
+      <span class="desc">22 проверки, 2 слоя</span>
     </div>
     <span class="flow-arrow">&rarr;</span>
     <div class="flow-step">
-      <span class="emoji">📊</span>
+      <span class="step-num">4</span>
       <span class="name">Отчёт</span>
       <span class="desc">Ошибки + fix в 1С</span>
     </div>
@@ -463,7 +468,7 @@
   <div class="grid-3">
     <div class="card">
       <div class="card-header">
-        <div class="icon" style="background:rgba(239,68,68,0.15)">⚖️</div>
+        <div class="icon" style="background:rgba(59,130,246,0.15);font-size:18px;color:var(--accent)">L1</div>
         <div>
           <h4>Layer 1</h4>
           <span class="tag tag-green">ГОТОВ</span>
@@ -473,7 +478,7 @@
     </div>
     <div class="card">
       <div class="card-header">
-        <div class="icon" style="background:rgba(245,158,11,0.15)">🔎</div>
+        <div class="icon" style="background:rgba(245,158,11,0.15);font-size:18px;color:var(--yellow)">L2</div>
         <div>
           <h4>Layer 2</h4>
           <span class="tag tag-green">ГОТОВ</span>
@@ -483,7 +488,7 @@
     </div>
     <div class="card">
       <div class="card-header">
-        <div class="icon" style="background:rgba(59,130,246,0.15)">🧠</div>
+        <div class="icon" style="background:rgba(6,182,212,0.15);font-size:18px;color:var(--cyan)">L3</div>
         <div>
           <h4>Layer 3</h4>
           <span class="tag tag-blue">ФАЗА 2</span>
@@ -574,6 +579,63 @@
 
 <div class="sep"></div>
 
+<!-- ========== 3.5. База знаний и источники ========== -->
+<div class="section">
+  <h2><span class="num">03+</span> Что уже спарсено и заложено в систему</h2>
+  <p class="subtitle">Нормативная база, структуры данных, объём</p>
+
+  <h3>Нормативные источники (встроены в код)</h3>
+  <table class="data-table">
+    <thead><tr><th>Источник</th><th>Что из него взято</th><th>Где в системе</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Приказ ФНС ЕД-7-15/519@</strong> от 25.05.2021</td><td>Все контрольные соотношения декларации НДС (КС 1.1–1.28)</td><td><code>rules.py</code> — 15 проверок</td></tr>
+      <tr><td><strong>Письмо ФНС СД-4-3/1064@</strong> от 05.02.2025</td><td>Актуализация КС, новые правила</td><td><code>rules.py</code></td></tr>
+      <tr><td><strong>Отчёт ФНС 1-НДС</strong> за Q3 2025</td><td>Безопасные доли вычетов по 85 регионам РФ</td><td><code>regions.py</code> — 85 записей</td></tr>
+      <tr><td><strong>Письмо ФНС СД-4-3/9134@</strong> от 17.07.2023</td><td>Методика сравнения доли вычетов с региональным порогом</td><td><code>rules.py</code> — <code>HIGH_DEDUCTION_RATIO</code></td></tr>
+      <tr><td><strong>НК РФ ст. 169, 170, 171, 172, 173, 176</strong></td><td>Правовые основания для каждой проверки и рекомендации</td><td>Поле <code>legal_basis</code> в каждом Issue</td></tr>
+      <tr><td><strong>НК РФ ст. 54.1</strong></td><td>Необоснованная налоговая выгода (для аномалий)</td><td><code>anomalies.py</code></td></tr>
+      <tr><td><strong>Постановление Правительства №1137</strong></td><td>Правила ведения книг покупок/продаж, формат СФ</td><td><code>anomalies.py</code> — дубли СФ</td></tr>
+      <tr><td><strong>XSD-схемы ФНС</strong> v5.09–v5.11+</td><td>Структура XML декларации НДС (КНД 1151001)</td><td><code>xml_parser.py</code> — content-based detection</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Что парсер извлекает из каждого XML</h3>
+  <div class="grid-2">
+    <div class="card">
+      <h4 style="margin-bottom:8px;font-size:14px;">Раздел 3 — Расчёт налога (24 поля)</h4>
+      <p>База и НДС по ставкам 20%, 18%, 10%, 0%. Авансы полученные (стр.070), восстановленный НДС (стр.080). Итого начислено (стр.118). Вычеты по товарам (стр.120), авансам (стр.130), ввозу ЕАЭС (стр.150), таможне (стр.160). Итого вычеты (стр.190). К уплате (стр.200) / к возмещению (стр.210).</p>
+    </div>
+    <div class="card">
+      <h4 style="margin-bottom:8px;font-size:14px;">Разделы 8–9 — Книги покупок/продаж</h4>
+      <p>Каждый счёт-фактура: ИНН/КПП контрагента, номер и дата СФ, сумма с НДС (копейки), сумма НДС (копейки), ставка налога, признак корректировки. Итоги по книгам. Типичный файл: 5–500 СФ.</p>
+    </div>
+  </div>
+
+  <h3>Объём заложенных знаний</h3>
+  <div class="grid-3">
+    <div class="card" style="text-align:center;">
+      <p style="font-size:28px;font-weight:700;color:var(--accent);margin-bottom:4px;">85</p>
+      <p style="font-size:13px;color:var(--text-dim);">регионов с индивидуальными порогами вычетов (обновляются ежеквартально)</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <p style="font-size:28px;font-weight:700;color:var(--accent);margin-bottom:4px;">22</p>
+      <p style="font-size:13px;color:var(--text-dim);">проверки: 15 КС ФНС + 7 детекторов аномалий, каждая со ссылкой на НК РФ</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <p style="font-size:28px;font-weight:700;color:var(--accent);margin-bottom:4px;">8</p>
+      <p style="font-size:13px;color:var(--text-dim);">нормативных документов встроено: приказы, письма ФНС, статьи НК РФ</p>
+    </div>
+  </div>
+
+  <h3>Алгоритм валидации ИНН</h3>
+  <p>Встроена проверка контрольных цифр для ИНН юридических лиц (10 знаков) и физических лиц (12 знаков). Весовые коэффициенты: <code>[2,4,10,3,5,9,4,6,8]</code> для ЮЛ, <code>[7,2,4,10,3,5,9,4,6,8]</code> + <code>[3,7,2,4,10,3,5,9,4,6,8]</code> для ФЛ. Проверяется каждый ИНН контрагента из книги покупок — невалидный ИНН означает потенциальный отказ в вычете.</p>
+
+  <h3>Совместимость парсера</h3>
+  <p>Content-based detection: парсер не привязан к имени файла или конкретной версии XSD. Определяет тип XML по набору тегов внутри документа. Поддерживает <strong>windows-1251</strong> и <strong>UTF-8</strong> кодировки (обе используются 1С). Работает со всеми версиями деклараций НДС с 2019 года.</p>
+</div>
+
+<div class="sep"></div>
+
 <!-- ========== 4. Пример реального аудита ========== -->
 <div class="section">
   <h2><span class="num">04</span> Пример: реальный аудит</h2>
@@ -615,32 +677,32 @@
 <span class="red">&#x1F534; Критических:  3</span>
 <span class="yellow">&#x1F7E1; Предупреждений: 1</span>
 <span class="green">&#x1F7E2; Пройдено:     8</span>
-💰 Под угрозой:  610,000 ₽
+Под угрозой:  610,000 ₽
 <span class="dim">============================================================</span>
 
 <span class="red">&#x1F534; [HIGH_DEDUCTION_RATIO]</span> <span class="bold">Доля вычетов 94.4% превышает безопасный порог 89.0% (Москва)</span>
    ФНС автоматически отбирает декларации с долей вычетов выше
    регионального порога для углублённой камеральной проверки.
-   💰 Под угрозой: 490,000 ₽
-   <span class="green">✅ Перенесите часть вычетов на следующий квартал.</span>
+   Под угрозой: 490,000 ₽
+   <span class="green">→Перенесите часть вычетов на следующий квартал.</span>
       п. 1.1 ст. 172 НК РФ — вычеты можно заявить в течение 3 лет
-   <span class="accent">📋 Основание: ст. 172 п. 1.1 НК РФ, Письмо ФНС СД-4-3/9134@</span>
+   <span class="accent">Основание: ст. 172 п. 1.1 НК РФ, Письмо ФНС СД-4-3/9134@</span>
 
 <span class="red">&#x1F534; [INVALID_INN]</span> <span class="bold">Невалидные ИНН контрагентов: 6 шт.</span>
    ИНН не прошли проверку контрольных цифр:
    7702123456, 7703234567, 7701111111, 7705456789, 7706567890
-   <span class="green">✅ Проверьте ИНН на nalog.ru. Вычеты по СФ с невалидным ИНН
+   <span class="green">→Проверьте ИНН на nalog.ru. Вычеты по СФ с невалидным ИНН
       могут быть оспорены ФНС.</span>
-   <span class="accent">📋 Основание: ст. 169 НК РФ п. 5, ст. 172 НК РФ</span>
+   <span class="accent">Основание: ст. 169 НК РФ п. 5, ст. 172 НК РФ</span>
 
 <span class="red">&#x1F534; [DUPLICATE_INVOICES]</span> <span class="bold">Дубликаты СФ в книге покупок: 1 шт.</span>
    СФ №089 от 15.02.2026, ИНН 7704345678 — 2 записи
-   💰 Под угрозой: 120,000 ₽
-   <span class="green">✅ Проверьте книгу покупок в 1С на задвоение СФ.</span>
+   Под угрозой: 120,000 ₽
+   <span class="green">→Проверьте книгу покупок в 1С на задвоение СФ.</span>
 
 <span class="yellow">&#x1F7E1; [LARGE_SINGLE_INVOICE]</span> <span class="bold">Единичный вычет = 42% от всех вычетов</span>
    СФ №234 от 28.03.2026 (ИНН 7703234567) содержит НДС 2,700,000 ₽
-   <span class="green">✅ Подготовьте документальное подтверждение: договор, акт, ТТН.</span>
+   <span class="green">→Подготовьте документальное подтверждение: договор, акт, ТТН.</span>
 
 <span class="green">&#x1F7E2; КС 1.1: Строка 118 корректна</span>
 <span class="green">&#x1F7E2; КС 1.2: Строка 190 корректна</span>
@@ -661,7 +723,7 @@
   <div class="grid-2">
     <div class="card">
       <div class="card-header">
-        <div class="icon" style="background:rgba(59,130,246,0.15)">⚡</div>
+        <div class="icon" style="background:rgba(59,130,246,0.15);font-size:13px;font-weight:700;color:var(--accent)">API</div>
         <h4>Backend</h4>
       </div>
       <p><strong>FastAPI + SQLAlchemy + SQLite</strong><br>
@@ -669,7 +731,7 @@
     </div>
     <div class="card">
       <div class="card-header">
-        <div class="icon" style="background:rgba(34,197,94,0.15)">🖥</div>
+        <div class="icon" style="background:rgba(34,197,94,0.15);font-size:13px;font-weight:700;color:var(--green)">UI</div>
         <h4>Frontend</h4>
       </div>
       <p><strong>Next.js 15 + App Router + Tailwind</strong><br>
@@ -677,7 +739,7 @@
     </div>
     <div class="card">
       <div class="card-header">
-        <div class="icon" style="background:rgba(245,158,11,0.15)">🔍</div>
+        <div class="icon" style="background:rgba(245,158,11,0.15);font-size:13px;font-weight:700;color:var(--yellow)">XML</div>
         <h4>XML-парсер</h4>
       </div>
       <p><strong>Content-based type detection</strong><br>
@@ -685,7 +747,7 @@
     </div>
     <div class="card">
       <div class="card-header">
-        <div class="icon" style="background:rgba(6,182,212,0.15)">🧠</div>
+        <div class="icon" style="background:rgba(6,182,212,0.15);font-size:13px;font-weight:700;color:var(--cyan)">AI</div>
         <h4>AI (Фаза 2)</h4>
       </div>
       <p><strong>Claude Sonnet 4.6 + Voyage-3 + pgvector</strong><br>
@@ -722,7 +784,7 @@
 ├── app/check/[id]/page.tsx <span class="dim"># Dashboard результатов</span>
 ├── components/
 │   ├── UploadZone.tsx      <span class="dim"># Drag-and-drop зона</span>
-│   ├── CheckSummary.tsx    <span class="dim"># Шапка: 🔴🟡🟢 + суммы</span>
+│   ├── CheckSummary.tsx    <span class="dim"># Шапка: метрики + severity</span>
 │   ├── IssueCard.tsx       <span class="dim"># Раскрывающаяся карточка</span>
 │   └── IssueList.tsx       <span class="dim"># Список проблем</span>
 └── lib/api.ts              <span class="dim"># fetch-клиент к FastAPI</span></div>
